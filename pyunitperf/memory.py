@@ -4,29 +4,31 @@ This package is dedicated to all the memory aspects testing.
 import tracemalloc
 from functools import wraps
 from typing import Callable
+import pyunitperf
 
 
-def _get_overload(snapshot: tracemalloc.Snapshot, key_type: str = 'lineno', threshold: int = 10):
+def _get_overload(snapshot: tracemalloc.Snapshot, key_type: str = 'lineno', threshold: float = 10):
     """
-    Returns a list of statistics that exceed the given threshold.
+    Returns a list of statistics that exceed the given threshold in KiB.
     :param snapshot: snapshot to analyze
     :param key_type: key used to order the snapshot's statistics
-    :param threshold: threshold not to exceed
+    :param threshold: threshold not to exceed (in KiB)
     :return: a list of statistics that exceed the given threshold
     """
     snapshot = snapshot.filter_traces((
         tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
         tracemalloc.Filter(False, "<unknown>"),
+        tracemalloc.Filter(False, pyunitperf.memory.__file__)
     ))
     stats = snapshot.statistics(key_type)
-    return [stat for stat in stats if stat.size >= threshold]
+    return [stat for stat in stats if stat.size / 1024 > threshold]
 
 
-def memory_not_exceed(threshold: int = 10):
+def memory_not_exceed(threshold: float = 10):
     """
     Tests that the memory taken up by the given function
-    doesn't exceed the given threshold.
-    :param threshold: threshold in bytes
+    doesn't exceed the given threshold in KiB.
+    :param threshold: threshold in KiB
     """
 
     def test_memory_decorator(func: Callable):
