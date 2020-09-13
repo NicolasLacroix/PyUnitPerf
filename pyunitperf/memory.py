@@ -52,11 +52,21 @@ def memory_not_exceed(threshold: float, exclude: ExcludeType = None):
     doesn't exceed the given threshold in KiB.
     :param threshold: threshold in KiB
     :param exclude: element(s) to be excluded from the snapshot
+    :return: the memeory_not_exceed's decorator
     """
 
     def memory_not_exceed_decorator(func: Callable):
+        """
+        memory_not_exceed's decorator.
+        :param func: function to call
+        :return: the memory_not_exceed's wrapper
+        """
         @wraps(func)
         def memory_not_exceed_wrapper(*args):
+            """
+            memory_not_exceed's wrapper.
+            :param args: wrapper's arguments
+            """
             tracemalloc.start()
             func(*args)
             snapshot = tracemalloc.take_snapshot()
