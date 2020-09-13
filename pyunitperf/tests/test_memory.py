@@ -34,7 +34,6 @@ class TestMemoryNotExceed(unittest.TestCase):
                     for e in exclude:
                         self.assertNotIn(e, stats_files)
 
-
     def test_get_overload(self):
         """
         Tests the _get_overload method.
