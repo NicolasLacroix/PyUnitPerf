@@ -19,7 +19,8 @@ class TestMemoryNotExceed(unittest.TestCase):
         Tests the _filter_snapshot method.
         """
         for exclude in [None, __file__, (tracemalloc.__file__, unittest.__file__)]:
-            with self.subTest(f"test _get_overload with empty statistics and exclude={exclude}", exclude=exclude):
+            with self.subTest("test _filter_snapshot with empty statistics and exclude={}".format(exclude),
+                              exclude=exclude):
                 tracemalloc.start()
                 list(range(1000000))
                 snapshot = tracemalloc.take_snapshot()

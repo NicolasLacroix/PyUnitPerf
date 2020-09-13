@@ -54,9 +54,9 @@ def memory_not_exceed(threshold: float, exclude: ExcludeType = None):
     :param exclude: element(s) to be excluded from the snapshot
     """
 
-    def test_memory_decorator(func: Callable):
+    def memory_not_exceed_decorator(func: Callable):
         @wraps(func)
-        def test_memory_wrapper(*args):
+        def memory_not_exceed_wrapper(*args):
             tracemalloc.start()
             func(*args)
             snapshot = tracemalloc.take_snapshot()
@@ -64,6 +64,6 @@ def memory_not_exceed(threshold: float, exclude: ExcludeType = None):
             snapshot = _filter_snapshot(snapshot, exclude=exclude)
             assert not _get_overload(snapshot, threshold=threshold), "Threshold reached"
 
-        return test_memory_wrapper
+        return memory_not_exceed_wrapper
 
-    return test_memory_decorator
+    return memory_not_exceed_decorator
