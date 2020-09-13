@@ -4,7 +4,7 @@ This package is dedicated to all the memory aspects testing.
 import tracemalloc
 from copy import deepcopy
 from functools import wraps
-from typing import Callable, Iterable, Optional
+from typing import Callable, Iterable, Optional, List
 import collections.abc as abc
 
 ExcludeType = Optional[Iterable[str]]
@@ -16,7 +16,7 @@ DEFAULT_FILTERS = {
 }
 
 
-def _filter_snapshot(snapshot: tracemalloc.Snapshot, exclude: ExcludeType = None):
+def _filter_snapshot(snapshot: tracemalloc.Snapshot, exclude: ExcludeType = None) -> tracemalloc.Snapshot:
     """
     Filters the given snapshot using the exclude value and the DEFAULT_FILTERS.
     :param snapshot: snapshot to be filtered
@@ -33,7 +33,8 @@ def _filter_snapshot(snapshot: tracemalloc.Snapshot, exclude: ExcludeType = None
     return snapshot.filter_traces(tuple(filters))
 
 
-def _get_overload(snapshot: tracemalloc.Snapshot, threshold: float, key_type: str = "lineno"):
+def _get_overload(snapshot: tracemalloc.Snapshot, threshold: float, key_type: str = "lineno") -> \
+        List[tracemalloc.Statistic]:
     """
     Returns a list of statistics that exceed the given threshold in KiB.
     :param snapshot: snapshot to analyze
@@ -46,7 +47,21 @@ def _get_overload(snapshot: tracemalloc.Snapshot, threshold: float, key_type: st
     return [stat for stat in stats if stat.size / 1024 > threshold]
 
 
-def memory_not_exceed(threshold: float, exclude: ExcludeType = None):
+def _get_failure_details(stats: List[tracemalloc.Statistic]) -> str:
+    """
+    Returns a string containing details about the given stats which led to a failure.
+    :param stats: statistics to describe
+    :return: a string containing details about the given stats
+             which led to a failure
+    """
+    details = "\n"
+    for stat in stats:
+        formatted_traceback = "\n".join(stat.traceback.format())
+        details += "{} failed with size : [{} KiB]\n".format(formatted_traceback, stat.size / 1024)
+    return details
+
+
+def memory_not_exceed(threshold: float, exclude: ExcludeType = None) -> Callable:
     """
     Tests that the memory taken up by the given function
     doesn't exceed the given threshold in KiB.
@@ -55,14 +70,14 @@ def memory_not_exceed(threshold: float, exclude: ExcludeType = None):
     :return: the memeory_not_exceed's decorator
     """
 
-    def memory_not_exceed_decorator(func: Callable):
+    def memory_not_exceed_decorator(func: Callable) -> Callable:
         """
         memory_not_exceed's decorator.
         :param func: function to call
         :return: the memory_not_exceed's wrapper
         """
         @wraps(func)
-        def memory_not_exceed_wrapper(*args):
+        def memory_not_exceed_wrapper(*args) -> None:
             """
             memory_not_exceed's wrapper.
             :param args: wrapper's arguments
@@ -72,7 +87,8 @@ def memory_not_exceed(threshold: float, exclude: ExcludeType = None):
             snapshot = tracemalloc.take_snapshot()
             tracemalloc.stop()
             snapshot = _filter_snapshot(snapshot, exclude=exclude)
-            assert not _get_overload(snapshot, threshold=threshold), "Threshold reached"
+            overload = _get_overload(snapshot, threshold=threshold)
+            assert not overload, _get_failure_details(overload)
 
         return memory_not_exceed_wrapper
 

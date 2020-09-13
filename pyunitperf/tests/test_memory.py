@@ -63,6 +63,9 @@ class TestMemoryNotExceed(unittest.TestCase):
             self.assertListEqual(expected, result)
 
     def test_memory_not_exceed_decorator(self):
+        """
+        Tests the memory_not_exceed decorator.
+        """
         @memory_not_exceed(threshold=0)
         def exceed():
             """
