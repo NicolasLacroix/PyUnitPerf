@@ -7,7 +7,14 @@ from typing import Callable
 import pyunitperf
 
 
-def _get_overload(snapshot: tracemalloc.Snapshot, key_type: str = 'lineno', threshold: float = 10):
+def _filter_snapshot(snapshot: tracemalloc.Snapshot):
+    return snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+        tracemalloc.Filter(False, "<unknown>"),
+        tracemalloc.Filter(False, pyunitperf.memory.__file__)
+    ))
+
+def _get_overload(snapshot: tracemalloc.Snapshot, key_type: str = "lineno", threshold: float = 10):
     """
     Returns a list of statistics that exceed the given threshold in KiB.
     :param snapshot: snapshot to analyze
@@ -15,11 +22,7 @@ def _get_overload(snapshot: tracemalloc.Snapshot, key_type: str = 'lineno', thre
     :param threshold: threshold not to exceed (in KiB)
     :return: a list of statistics that exceed the given threshold
     """
-    snapshot = snapshot.filter_traces((
-        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
-        tracemalloc.Filter(False, "<unknown>"),
-        tracemalloc.Filter(False, pyunitperf.memory.__file__)
-    ))
+    snapshot = _filter_snapshot(snapshot)
     stats = snapshot.statistics(key_type)
     return [stat for stat in stats if stat.size / 1024 > threshold]
 

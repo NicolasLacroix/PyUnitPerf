@@ -16,16 +16,14 @@ class TestLimitMemoryUsage(unittest.TestCase):
         """
         This test won't pass due to a very low threshold.
         """
-        count = 0
-        return [count * i for i in range(1000000)]
+        list(range(1000000))
 
     @memory_not_exceed(threshold=1000)
     def test_memory_usage_not_exceed(self):
         """
-        This test pass due to a very high threshold.
+        This test passes due to a very high threshold.
         """
-        count = 0
-        return [count * i for i in range(1000000)]
+        list(range(1000000))
 
 
 if __name__ == '__main__':
