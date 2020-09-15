@@ -1,6 +1,6 @@
 """
-This file contains classes that illustrate the use of the
-pyunitperf.memory package.
+This file contains a class that illustrates the use of the
+memory limit assertions using the pyunitperf.memory package.
 """
 import unittest
 

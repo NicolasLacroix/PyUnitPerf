@@ -11,12 +11,13 @@ from pyunitperf.memory import _get_overload, memory_not_exceed, _filter_snapshot
 
 class TestMemoryNotExceed(unittest.TestCase):
     """
-    This class tests the pyunitperf.memory functions.
+    This class tests the memory_not_exceed decorator and associated functions
+    in the package pyunitperf.memory.
     """
 
     def test_filter_snapshot(self):
         """
-        Tests the _filter_snapshot method.
+        Tests the _filter_snapshot function.
         """
         for exclude in [None, __file__, (tracemalloc.__file__, unittest.__file__)]:
             with self.subTest("test _filter_snapshot with empty statistics and exclude={}".format(exclude),
@@ -37,7 +38,7 @@ class TestMemoryNotExceed(unittest.TestCase):
 
     def test_get_overload(self):
         """
-        Tests the _get_overload method.
+        Tests the _get_overload function.
         """
         with self.subTest("test _get_overload with empty statistics"):
             snapshot = Snapshot((), 0)
