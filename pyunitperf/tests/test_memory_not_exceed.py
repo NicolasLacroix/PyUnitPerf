@@ -6,7 +6,7 @@ import unittest
 from collections.abc import Iterable
 from tracemalloc import Snapshot
 
-from pyunitperf.memory import _get_overload, memory_not_exceed, _filter_snapshot
+from pyunitperf.memory import _get_overload, memory_not_exceed, _filter_snapshot, DEFAULT_FILTERS
 
 
 class TestMemoryNotExceed(unittest.TestCase):
@@ -19,16 +19,18 @@ class TestMemoryNotExceed(unittest.TestCase):
         """
         Tests the _filter_snapshot function.
         """
-        for exclude in [None, __file__, (tracemalloc.__file__, unittest.__file__)]:
-            with self.subTest("test _filter_snapshot with empty statistics and exclude={}".format(exclude),
-                              exclude=exclude):
+
+        for exclude in [None] + [filter.filename_pattern  for filter in DEFAULT_FILTERS]:
+            with self.subTest("test _filter_snapshot with empty statistics and exclude={}"
+                                      .format(exclude), exclude=exclude):
                 tracemalloc.start()
                 list(range(1000000))
                 snapshot = tracemalloc.take_snapshot()
                 tracemalloc.stop()
                 filtered_snapshot = _filter_snapshot(snapshot, exclude=exclude)
                 stats_files = [
-                    frame.filename for stat in filtered_snapshot.statistics("lineno") for frame in stat.traceback
+                    frame.filename for stat in filtered_snapshot.statistics("lineno")
+                    for frame in stat.traceback
                 ]
                 if isinstance(exclude, str):
                     self.assertNotIn(exclude, stats_files)
@@ -50,8 +52,7 @@ class TestMemoryNotExceed(unittest.TestCase):
             list(range(1000000))
             snapshot = tracemalloc.take_snapshot()
             tracemalloc.stop()
-            filtered_snapshot = _filter_snapshot(snapshot)
-            expected = filtered_snapshot.statistics("lineno")
+            expected = snapshot.statistics("lineno")
             result = _get_overload(snapshot, threshold=0)
             self.assertListEqual(expected, result)
         with self.subTest("test _get_overload with filled statistics and high threshold"):
@@ -67,16 +68,18 @@ class TestMemoryNotExceed(unittest.TestCase):
         """
         Tests the memory_not_exceed decorator.
         """
+
         @memory_not_exceed(threshold=0)
         def exceed():
             """
             This function exceeds the specified threshold and
             should raise an AssertionError.
             """
-            list(range(1000000))
+            return list(range(10)) * 1
 
         with self.subTest("test_memory_not_exceed_decorator with failure"):
             self.assertRaises(AssertionError, exceed)
+
 
         @memory_not_exceed(threshold=100)
         def not_exceed():
@@ -84,7 +87,6 @@ class TestMemoryNotExceed(unittest.TestCase):
             This function doesn't exceed the specified threshold and
             shouldn't raise an AssertionError.
             """
-            list(range(0))
 
         with self.subTest("test_memory_not_exceed_decorator without failure"):
             not_exceed()

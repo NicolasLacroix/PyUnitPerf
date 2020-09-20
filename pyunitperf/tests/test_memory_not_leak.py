@@ -17,7 +17,6 @@ class TestMemoryNotLeak(unittest.TestCase):
         """
         Tests the _get_leaks function.
         """
-        pass
 
     def test_memory_not_leak_decorator(self):
         """
@@ -39,7 +38,6 @@ class TestMemoryNotLeak(unittest.TestCase):
             This function doesn't leak and shouldn't raise
             an AssertionError.
             """
-            pass
 
         with self.subTest("test_memory_not_leak_decorator without failure"):
             not_leaks()
@@ -52,7 +50,8 @@ class TestMemoryNotLeak(unittest.TestCase):
             """
             self.leaking_list.append("will leak")
 
-        with self.subTest("test_memory_not_leak_decorator with memory leak but no failure (high threshold)"):
+        with self.subTest("test_memory_not_leak_decorator with memory leak but "
+                          "no failure (high threshold)"):
             leaks_no_failure()
 
 

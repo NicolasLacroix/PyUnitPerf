@@ -17,7 +17,6 @@ DEFAULT_FILTERS = {
     tracemalloc.Filter(False, __file__)
 }
 
-
 def _filter_snapshot(snapshot: Snapshot, exclude: ExcludeType = None) -> tracemalloc.Snapshot:
     """
     Filters the given snapshot using the exclude value and the DEFAULT_FILTERS.
@@ -35,7 +34,8 @@ def _filter_snapshot(snapshot: Snapshot, exclude: ExcludeType = None) -> tracema
     return snapshot.filter_traces(tuple(filters))
 
 
-def _get_overload(snapshot: Snapshot, threshold: float, key_type: str = "lineno") -> List[Statistic]:
+def _get_overload(snapshot: Snapshot, threshold: float, key_type: str = "lineno") -> \
+        List[Statistic]:
     """
     Returns a list of statistics that exceed the given threshold in KiB.
     :param snapshot: snapshot to analyze
@@ -48,8 +48,8 @@ def _get_overload(snapshot: Snapshot, threshold: float, key_type: str = "lineno"
     return [stat for stat in stats if stat.size / 1024 > threshold]
 
 
-def _get_leaks(snapshot1: Snapshot, snapshot2: Snapshot, threshold: float, key_type: str = "lineno") -> \
-        List[StatisticDiff]:
+def _get_leaks(snapshot1: Snapshot, snapshot2: Snapshot, threshold: float,
+               key_type: str = "lineno") -> List[StatisticDiff]:
     """
     Returns a list of statistics that contains detected memory leaks above
     the given threshold in bytes.
@@ -83,10 +83,11 @@ def _get_leaks_details(stats: List[StatisticDiff]) -> str:
     :return: a string containing details about the given stats
              which led to a failure
     """
+    failed_sentence = "{} failed with diff : [{} B]\n"
     details = "\n"
     for stat in stats:
         formatted_traceback = "\n".join(stat.traceback.format())
-        details += "{} failed with diff : [{} B]\n".format(formatted_traceback, stat.size_diff / 1024)
+        details += failed_sentence.format(formatted_traceback, stat.size_diff / 1024)
     return details
 
 
