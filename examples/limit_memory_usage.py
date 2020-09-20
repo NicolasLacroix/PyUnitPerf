@@ -17,7 +17,6 @@ class TestLimitMemoryUsage(unittest.TestCase):
         This test won't pass due to a very low threshold.
         """
         list(range(1000000))
-        list(range(20000000))
 
     @memory_not_exceed(threshold=1000)
     def test_memory_usage_not_exceed(self):
