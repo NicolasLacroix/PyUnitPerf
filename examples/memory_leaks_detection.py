@@ -31,7 +31,8 @@ class TetsMemoryLeaksDetection(unittest.TestCase):
         """
         This test passes due to the absence of memory leak.
         """
-        pass
+        valid_list = []
+        valid_list.append("won't leak")
 
 
 if __name__ == '__main__':
